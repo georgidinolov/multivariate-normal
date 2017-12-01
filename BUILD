@@ -12,3 +12,10 @@ cc_binary(
 	includes = ["MultivariateNormal.hpp"],
 	deps = [":multivariate-normal"],
 )
+
+cc_binary(
+	name = "wishart-test",
+	srcs = ["wishart-test.cpp"],
+	includes = ["MultivariateNormal.hpp"],
+	deps = [":multivariate-normal"],
+)

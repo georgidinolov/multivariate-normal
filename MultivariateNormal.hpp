@@ -17,6 +17,18 @@ public:
 	       const gsl_vector *mean, 
 	       const gsl_matrix *var, 
 	       gsl_vector *result) const;
+
+  void rinvwishart(const gsl_rng *r,
+  		   const int p,
+  		   const int n,
+  		   const gsl_matrix *var,
+  		   gsl_matrix *result) const;
+  
+  void rwishart(const gsl_rng *r,
+		const int p,
+		const int n,
+		const gsl_matrix *var,
+		gsl_matrix *result) const;
   
   double dmvnorm(const int n,
 		 const gsl_vector *x, 
