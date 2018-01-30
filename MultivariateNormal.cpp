@@ -199,6 +199,52 @@ double MultivariateNormal::dmvnorm(const int n,
   return ay;
 }
 
+double MultivariateNormal::log_dmvnorm(const int n,
+				   const gsl_vector *x,
+				   const gsl_vector *mean,
+				   const gsl_matrix *var) const {
+  /* multivariate normal density function    */
+  /*
+   *	n	dimension of the random vetor
+   *	mean	vector of means of size n
+   *	var	variance matrix of dimension n x n
+   */
+  int s;
+  double ln_ax,ay;
+  gsl_vector *ym, *xm;
+  gsl_matrix *work = gsl_matrix_alloc(n,n),
+    *winv = gsl_matrix_alloc(n,n);
+  gsl_permutation *p = gsl_permutation_alloc(n);
+
+  gsl_matrix_memcpy( work, var );
+  gsl_linalg_LU_decomp( work, p, &s );
+  gsl_linalg_LU_invert( work, p, winv );
+  ln_ax = gsl_linalg_LU_lndet( work );
+  gsl_matrix_free( work );
+  gsl_permutation_free( p );
+
+  xm = gsl_vector_alloc(n);
+  gsl_vector_memcpy( xm, x);
+  gsl_vector_sub( xm, mean );
+  ym = gsl_vector_alloc(n);
+  gsl_blas_dsymv(CblasUpper,1.0,winv,xm,0.0,ym);
+
+  printf("ym = ");
+  for (unsigned i=0; i<n; ++i) {
+    printf("%f ", gsl_vector_get(ym,i));
+  }
+  printf("\n");
+
+  gsl_matrix_free( winv );
+  gsl_blas_ddot( xm, ym, &ay);
+  gsl_vector_free(xm);
+  gsl_vector_free(ym);
+
+  ay = -0.5*ay - 0.5* ( n*log(2*M_PI) + ln_ax );
+  printf("ay = %f; ln_ax = %f;\n", ay, ln_ax);
+  return ay;
+}
+
 double MultivariateNormal::dmvnorm_log(const int n,
 				       const gsl_vector *x,
 				       const gsl_vector *mean,
