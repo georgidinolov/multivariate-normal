@@ -229,11 +229,18 @@ double MultivariateNormal::log_dmvnorm(const int n,
   ym = gsl_vector_alloc(n);
   gsl_blas_dsymv(CblasUpper,1.0,winv,xm,0.0,ym);
 
-  printf("ym = ");
-  for (unsigned i=0; i<n; ++i) {
-    printf("%f ", gsl_vector_get(ym,i));
-  }
-  printf("\n");
+  // printf("ym = ");
+  // for (unsigned i=0; i<n; ++i) {
+  //   printf("%f ", gsl_vector_get(ym,i));
+  // }
+  // printf("\n");
+  // printf("cov = ");
+  // for (unsigned i=0; i<n; ++i) {
+  //   for (unsigned j=0; j<n; ++j) {
+  //     printf("%f ", gsl_matrix_get(var,i,j));
+  //   }
+  //   printf("\n");
+  // }
 
   gsl_matrix_free( winv );
   gsl_blas_ddot( xm, ym, &ay);
@@ -241,7 +248,7 @@ double MultivariateNormal::log_dmvnorm(const int n,
   gsl_vector_free(ym);
 
   ay = -0.5*ay - 0.5* ( n*log(2*M_PI) + ln_ax );
-  printf("ay = %f; ln_ax = %f;\n", ay, ln_ax);
+  //  printf("ay = %f; ln_ax = %f;\n", ay, ln_ax);
   return ay;
 }
 
