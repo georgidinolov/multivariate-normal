@@ -34,10 +34,11 @@ public:
 		 const gsl_vector *x, 
 		 const gsl_vector *mean, 
 		 const gsl_matrix *var) const;
+
   double log_dmvnorm(const int n,
-		 const gsl_vector *x, 
-		 const gsl_vector *mean, 
-		 const gsl_matrix *var) const;
+		     const gsl_vector *x, 
+		     const gsl_vector *mean, 
+		     const gsl_matrix *var) const;
   
   double dmvnorm_log(const int n, 
 		     const gsl_vector *x, 

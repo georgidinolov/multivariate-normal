@@ -263,33 +263,57 @@ double MultivariateNormal::dmvnorm_log(const int n,
    *	mean	vector of means of size n
    *	var	variance matrix of dimension n x n
    */
+  double out = 0;
+  if ((n==1) || (n>2)) {
+    int s;
+    double ax,ay;
+    gsl_vector *ym, *xm;
+    gsl_matrix *work = gsl_matrix_alloc(n,n),
+      *winv = gsl_matrix_alloc(n,n);
+    gsl_permutation *p = gsl_permutation_alloc(n);
 
-  int s;
-  double ax,ay;
-  gsl_vector *ym, *xm;
-  gsl_matrix *work = gsl_matrix_alloc(n,n),
-    *winv = gsl_matrix_alloc(n,n);
-  gsl_permutation *p = gsl_permutation_alloc(n);
+    gsl_matrix_memcpy( work, var );
+    gsl_linalg_LU_decomp( work, p, &s );
+    gsl_linalg_LU_invert( work, p, winv );
+    ax = gsl_linalg_LU_det( work, s );
+    gsl_matrix_free( work );
+    gsl_permutation_free( p );
 
-  gsl_matrix_memcpy( work, var );
-  gsl_linalg_LU_decomp( work, p, &s );
-  gsl_linalg_LU_invert( work, p, winv );
-  ax = gsl_linalg_LU_det( work, s );
-  gsl_matrix_free( work );
-  gsl_permutation_free( p );
+    xm = gsl_vector_alloc(n);
+    gsl_vector_memcpy( xm, x);
+    gsl_vector_sub( xm, mean );
+    ym = gsl_vector_alloc(n);
+    gsl_blas_dsymv(CblasUpper,1.0,winv,xm,0.0,ym);
+    gsl_matrix_free( winv );
+    gsl_blas_ddot( xm, ym, &ay);
+    gsl_vector_free(xm);
+    gsl_vector_free(ym);
+    ay = (-0.5*ay)- 0.5*log( pow((2*M_PI),n)*ax );
+    out = ay;
+  } else {
 
-  xm = gsl_vector_alloc(n);
-  gsl_vector_memcpy( xm, x);
-  gsl_vector_sub( xm, mean );
-  ym = gsl_vector_alloc(n);
-  gsl_blas_dsymv(CblasUpper,1.0,winv,xm,0.0,ym);
-  gsl_matrix_free( winv );
-  gsl_blas_ddot( xm, ym, &ay);
-  gsl_vector_free(xm);
-  gsl_vector_free(ym);
-  ay = (-0.5*ay)- 0.5*log( pow((2*M_PI),n)*ax );
+    double sigma_x = std::sqrt(gsl_matrix_get(var,0,0));
+    double sigma_y = std::sqrt(gsl_matrix_get(var,1,1));
+    double rho = gsl_matrix_get(var,0,1)/(sigma_x*sigma_y);
 
-  return ay;
+    double xx = gsl_vector_get(x,0);
+    double yy = gsl_vector_get(x,1);
+
+    double x0 = gsl_vector_get(mean,0);
+    double y0 = gsl_vector_get(mean,1);
+
+    out =
+      -1.0*(log(2*M_PI) +
+	    log(sigma_x) +
+	    log(sigma_y) +
+	    0.5*log(1-rho*rho)) +
+      -0.5/(1.0-rho*rho) *
+      ( (xx-x0)*(xx-x0)/(sigma_x*sigma_x) +
+	(yy-y0)*(yy-y0)/(sigma_y*sigma_y) -
+	2.0*rho*(xx-x0)*(yy-y0)/(sigma_x*sigma_y) );
+  }
+
+  return out;
 }
 
 // double dmvnorm_log(const int n,
