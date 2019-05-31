@@ -3,7 +3,8 @@ cc_library(
 	srcs = ["MultivariateNormal.cpp"],
 	hdrs = ["MultivariateNormal.hpp"],
 	linkopts = ["-lm", "-lgsl", "-lgslcblas"],
-	visibility = ["//visibility:public"]
+	visibility = ["//visibility:public"],
+	copts = ["-O"]
 )
 
 cc_binary(
